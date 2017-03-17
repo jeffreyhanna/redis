@@ -123,6 +123,33 @@ public class Redbird {
         }
         return ret!
     }
+	
+    public func subscribe(_ channel: String, readBlock: (RespObject)->()) throws {
+        
+        let initialResponse = try command("SUBSCRIBE", params: [channel])
+        
+        readBlock(initialResponse)
+        
+        while true {
+            
+            try self.handleComms {
+                
+                //delegate reading to parsers
+                let reader: SocketReader = self.socket
+                
+                //try to parse the string into a Resp object, fail if no parser accepts it
+                let (responseObject, _) = try InitialParser().parse([], reader: reader)
+                
+                //TODO: read up on whether potential leftover characters from
+                //parsing should be treated as error or not, for now ignore them.
+                
+                readBlock(responseObject)
+                
+            }
+            
+        }
+        
+    }
     
     public func pipeline() -> Pipeline {
         return Pipeline(config: self.config, socket: self.socket)
