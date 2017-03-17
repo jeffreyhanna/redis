@@ -126,9 +126,7 @@ public class Redbird {
 	
     public func subscribe(_ channel: String, readBlock: (RespObject)->()) throws {
         
-        let initialResponse = try command("SUBSCRIBE", params: [channel])
-        
-        readBlock(initialResponse)
+        _ = try command("SUBSCRIBE", params: [channel])
         
         while true {
             
